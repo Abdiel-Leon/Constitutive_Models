@@ -28,14 +28,6 @@ class MC_pq:
         self.eta = 6*numpy.sin(self.phi)/(3-numpy.sin(self.phi))
 
 
-# Implementation based on the matrix structure presented by Prof. Minna 
-
-# |p|  |K11 K12| |ev|
-# |q|  |K21 K22| |es|
-
-# which results from solving for the plastic multiplier (lambda) considering the yield function, 
-#flow rule and other components of the model. This small implementation is suitable 
-#for the solution of Tx compression element tests, given a set of material parameters and a confinement pressure sig3.
     def Initialize(self):
         tol_F = 1e-6
         self.dF_sig1 = 0
@@ -45,6 +37,7 @@ class MC_pq:
         return tol_F, d_lambda, d_eps1_p,d_eps3_p
 
     def Compute_F(self):
+        # yield surface
         tol_F,d_lambda,d_eps1_p,d_eps3_p = self.Initialize()
         
         F = -(self.sig1 - self.sig3) + (self.sig1 + self.sig3)*numpy.sin(self.phi) + 2*self.c*numpy.cos(self.phi)
@@ -57,7 +50,7 @@ class MC_pq:
         return F, d_eps1_p#, d_eps3_p
     
     def Compute_Lambda(self,F):
-        # **Maybe I have to relate eps 3 to eps 1 using the poisson**
+        # Plastic multiplier
         self.dF_sig1 = 1-numpy.sin(self.phi)
         self.dF_sig3 = -1-numpy.sin(self.phi)
         
@@ -76,7 +69,6 @@ class MC_pq:
         print(self.d_eps1 - d_eps1_p)
         self.sig1 = self.sig1 + self.dsig1
         q = -(self.sig1)#-self.sig3)
-        #print("s1", self.sig1)
         return q
     
    # def Compute_eps_v(self,eps1,eps3,d_eps3_p):
@@ -85,7 +77,7 @@ class MC_pq:
       #   return ev       
         
     def Compute_test(self):
-        n = 10000
+        n = 2000
         q = numpy.zeros(n)   
         e = numpy.zeros(n)   
         ev = numpy.zeros(n)   
